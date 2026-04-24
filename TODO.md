@@ -247,6 +247,237 @@ rebuilt with ArduRover, GPS, and LiDAR-based collision avoidance.
 
 ---
 
+---
+
+## Priority 5 — 3D Print File Organization
+
+> **Context:** `3d-prints/` contains **295 STL files totalling ~329 MB** exported from the full
+> Fusion 360 assembly. Most of the bulk is high-poly CAD reference meshes of purchased parts
+> (servos, bearings, motors) that must never be sent to a slicer. The actual printable count is
+> roughly 80–100 files. Goal: quarantine context-only files, then sort printable parts into
+> sub-assembly packs kept under **10 MB raw** (slicer project files add overhead on top).
+
+### Step 1 — Quarantine context-only models (DO NOT PRINT) ✅
+
+Create `3d-prints/_context_only/` and move the following in. None of these are printed — they are
+purchased hardware reference geometry used in the assembly for spatial planning.
+
+- [x] **Servo MG996R bodies** — every file matching `*Servo MG996R v2*Body[1-9]*.stl`
+  (Body1 = housing ~2–3 MB, Body2 = case cover ~2–6 MB, Body3–7 = internals/screws ~28–840 KB each)
+  Affects: rover core steering servos (×8), arm servos (servo_and_horn v2 instances ×4),
+  head servos (×2). **Exception: the `servo_and_horn v2 (N)_1_Body1.stl` files are the
+  3D-printed servo horn — keep those in their assembly packs below.**
+
+- [x] **Gripper servo** — `*gripper_Assy_V3*Servo v1_1_Body1.stl` and `Body2.stl` (~257 KB, ~490 KB)
+
+- [x] **Ball Bearing 608ZZ** — all three instances (`v1_1`, `v1_2`, arm `v1_3`),
+  20 bodies each. The large ones (Body8 = 9.5 MB, Body9 = 9.3 MB, Body19 = 6.5 MB, Body20 = 7.7 MB)
+  account for most of the 329 MB total. This group alone is ~150 MB.
+
+- [x] **SKF 6005 25mm Bearings** — `*25mm Bearing SKF 6005*` (12 bodies, ~715 KB + 11 × ~139 KB)
+
+- [x] **DC Motors** — `*DC-motor v10*Body1.stl` and mirror variant (~227 KB each)
+
+- [x] **Pololu shaft hub** — `*pololu-universal-aluminum-mounting-hub*` (~1.2 MB, purchased part)
+
+- [x] **McMaster fasteners** — `*90592A085*` (7 instances × ~3.3 MB each = ~23 MB) and
+  `*90965A130*` (~50 KB) — these are hex bolt/nut reference models
+
+- [ ] **Review before printing** — `*Rover core v232_1_Body46.stl` (7.3 KB — likely a tiny hardware
+  reference). Cross-check any Rover core `Body*.stl` under 50 KB against the CAD before including
+  in a print pack.
+
+---
+
+### Step 2 — Organize printable parts into print packs
+
+Create sub-folders under `3d-prints/` as below. Each pack should be under ~10 MB raw STL.
+After sorting, import each folder into your slicer as a project to add print profiles/supports.
+
+> **Naming convention:** `NN_description/` with two-digit prefix for print order.
+
+---
+
+#### Pack 01 — Chassis Body Panels (~3.6 MB)
+`3d-prints/01_chassis_body/`
+
+- [ ] Move all `Rover body_Rover_Full_Body*.stl` (Body1, 3, 4, 5, 6, 7, 9, 10, 13, 14, 15, 16 — 12 files, ~3.1 MB)
+- [ ] Move `Rover body_Rover_Full_Lid1.stl` (~592 KB)
+- **Notes:** These are the outer hull plates and electronics bay lid. Likely PETG or PLA+. Check
+  for living-hinge or snap features that may need specific orientation.
+
+---
+
+#### Pack 02 — Head Assembly Part 1 (~3.8 MB)
+`3d-prints/02_head_pack1/`
+
+- [ ] `*head_rotator_1_Body1/2/3.stl` (yaw rotator bracket, ~475 KB total)
+- [ ] `*head_rotator_1_head_1_Body1/2/3/4.stl` (head housing, ~994 KB total)
+- [ ] `*espcam_holder_1_Body1/2.stl` (camera mount, ~48 KB total)
+- [ ] `*head_top_connector_1_Body1/2/3/4/5/6/9/10/11/15.stl` (smaller connector parts, ~2.3 MB)
+- [ ] Move both `servo_and_horn v2 (4)_1_Body1.stl` and `v2 (5)_1_Body1.stl` here
+  (the **printed** servo horns for head yaw + pitch, ~109 KB each)
+- **Notes:** Head houses ESP32-CAM. Plan sensor mast provisions here for LiDAR/GPS if mounting on head.
+
+---
+
+#### Pack 03 — Head Assembly Part 2 (~2.2 MB)
+`3d-prints/03_head_pack2/`
+
+- [ ] `*head_top_connector_1_Body7.stl` (~1.3 MB — largest head part)
+- [ ] `*head_top_connector_1_Body8.stl` (~881 KB)
+- [ ] `*head_top_connector_1_Body13/14.stl` (~464 KB + ~202 KB)
+- **Notes:** Body7 is the largest single head part — verify print orientation for overhang.
+
+---
+
+#### Pack 04 — Arm Structure (~4.5 MB)
+`3d-prints/04_arm_structure/`
+
+- [ ] `*arm_1_1_Body1.stl` (first arm link, ~1.1 MB)
+- [ ] `*arm_1_1_body_connector_1_Body1.stl` (~852 KB)
+- [ ] `*arm_body_connector_1_Body1.stl` (base to arm connector, ~348 KB)
+- [ ] `*arm2_1_Body1.stl` and `arm2_1_Body2.stl` (second link, ~329 KB + ~229 KB)
+- [ ] `*arm2(Mirror)(Mirror)_1_Body1.stl` and `Body2.stl` (mirror of above for other side, ~326 KB + ~228 KB)
+- [ ] `*arm3_1_Body1.stl` (third arm link, ~1.2 MB)
+- **Notes:** arm2 and its mirror may require different print orientations for layer strength.
+  Consider printing arm links in PETG for toughness.
+
+---
+
+#### Pack 05 — Arm Gripper Connector & Servo Horns (~2.6 MB)
+`3d-prints/05_arm_gripper_connector/`
+
+- [ ] `*arm_gripper_connector_1_Body1.stl` (~874 KB)
+- [ ] `*arm_gripper_connector_1_Body2.stl` (~374 KB)
+- [ ] `*arm_gripper_connector_1_grip_rotator_1_Body1.stl` (~987 KB)
+- [ ] `*arm_1_1_servo_and_horn v2 (1)_1_Body1.stl` (printed arm servo horn, ~109 KB)
+- [ ] `*arm_gripper_connector_1_servo_and_horn v2 (2)_1_Body1.stl` (~108 KB)
+- [ ] `*arm_gripper_connector_1_grip_rotator_1_servo_and_horn v2 (3)_1_Body1.stl` (~108 KB)
+- **Notes:** The three `Body1` servo horn files here are the **only printable parts** in those
+  servo_and_horn sub-assemblies — all sibling `Servo MG996R v2_*_Body*` files go to _context_only.
+
+---
+
+#### Pack 06 — Gripper Finger Assembly (~4.3 MB)
+`3d-prints/06_gripper_fingers/`
+
+- [ ] `*gripper_Assy_V3*gear_horn25T_L*Body1.stl` (~799 KB)
+- [ ] `*gripper_Assy_V3*gear_horn25T_R*Body1.stl` (~307 KB)
+- [ ] `*gripper_Assy_V3*lower_arm_L*Body1.stl` (~151 KB)
+- [ ] `*gripper_Assy_V3*lower_arm_R*Body1.stl` (~151 KB)
+- [ ] `*gripper_Assy_V3*lower_plate*Body1.stl` (~590 KB)
+- [ ] `*gripper_Assy_V3*middle_plate*Body1.stl` (~595 KB)
+- [ ] `*gripper_Assy_V3*rear_*plate_horn25T*Body1.stl` (~207 KB)
+- [ ] `*gripper_Assy_V3*rod (X4)*_1_Body1.stl` through `_4_Body1.stl` (×4, ~494 KB each = ~1.98 MB)
+- [ ] `*gripper_Assy_V3*upper_arm_L*Body1.stl` (~163 KB)
+- [ ] `*gripper_Assy_V3*upper_arm_R*Body1.stl` (~163 KB)
+- [ ] `*gripper_Assy_V3*upper_plate*Body1.stl` (~307 KB)
+- **Notes:** 4× rods are identical — print all 4 in one plate. The gear horns are mirrored;
+  verify chirality before printing.
+
+---
+
+#### Pack 07 — Suspension Connectors (~4.9 MB)
+`3d-prints/07_suspension_connectors/`
+
+- [ ] `*back_two_wheel_connector_1_Body1.stl` (~698 KB)
+- [ ] `*back_two_wheel_connector(Mirror)_1_Body1.stl` (~699 KB)
+- [ ] `*main_leg_body_connector_1_Body1.stl` (~1.78 MB)
+- [ ] `*main_leg_body_connector(Mirror)_1_Body1.stl` (~1.79 MB)
+- **Notes:** These are the rocker-bogie pivot connectors — high stress parts. PETG or ABS
+  recommended. The mirror pairs are left/right; print one of each side ×2 total (one per bogie).
+
+---
+
+#### Pack 08 — Wheel Hub & Axle Small Parts (~4.9 MB)
+`3d-prints/08_wheel_hub_smalls/`
+
+- [ ] `*corner_wheel2_1_Body2.stl` (~591 KB)
+- [ ] `*corner_wheel2_1_Body3.stl` (~403 KB)
+- [ ] `*corner_wheel2_1_Body4.stl` (~548 KB)
+- [ ] `*corner_wheel2_1_Body5.stl` (~428 KB)
+- [ ] `*corner_wheel2_1_Body6.stl` (~119 KB)
+- [ ] `*corner_wheel2_1_Body7.stl` (~550 KB)
+- [ ] `*corner_wheel2_1_Body9.stl` (~550 KB)
+- [ ] `*corner_wheel2_1_Body10.stl` (~403 KB)
+- [ ] `*middle_wheel_1_Body1.stl` (~403 KB)
+- [ ] `*middle_wheel_1_Body2.stl` (~591 KB)
+- [ ] `*middle_wheel_1_Body5.stl` (~403 KB)
+- **Notes:** These are the hub faces, axle flanges, and steering knuckle small bodies.
+  Note: corner_wheel2 is used ×4 (one per corner) — print multiples as needed.
+
+---
+
+#### Pack 09 — Corner Wheel Shell A (~4.0 MB)
+`3d-prints/09_wheel_corner_A/`
+
+- [ ] `*corner_wheel2_1_Body1.stl` (~4.0 MB — the main corner wheel outer shell)
+- **Notes:** This is a large single part. Verify it fits your print bed. Needs 4 total — print 1
+  to validate fit, then run the remaining 3.
+
+---
+
+#### Pack 10 — Corner Wheel Shell B (~4.1 MB)
+`3d-prints/10_wheel_corner_B/`
+
+- [ ] `*corner_wheel2_1_Body8.stl` (~4.1 MB — the corner wheel inner shell / TPU candidate)
+- **Notes:** If printing the Mars 2020-style flexible wheel outer, use TPU here. Separate slicer
+  profile required. Need 4 total.
+
+---
+
+#### Pack 11 — Middle Wheel Shell A (~4.0 MB)
+`3d-prints/11_wheel_middle_A/`
+
+- [ ] `*middle_wheel_1_Body3.stl` (~4.0 MB)
+- **Notes:** Middle wheel outer skin. Need 2 total (one per side). TPU candidate if using flex wheels.
+
+---
+
+#### Pack 12 — Middle Wheel Shell B (~4.1 MB)
+`3d-prints/12_wheel_middle_B/`
+
+- [ ] `*middle_wheel_1_Body4.stl` (~4.1 MB)
+- **Notes:** Middle wheel inner body. Need 2 total.
+
+---
+
+#### Packs 13–17 — Rover Core Structure Body Parts (~28 MB across 5 packs)
+> The 54 numbered `Rover core v232_1_Body*.stl` files are generic structural parts
+> (frame rails, motor mounts, axle housings, brackets). They have no named sub-assembly
+> context, so these are binned by size into safe packs. **Cross-reference each body
+> number against the Fusion 360 model before printing to confirm it is not a hardware
+> reference** — especially any file under 50 KB.
+
+- [ ] **Pack 13** `3d-prints/13_core_structure_A/` — Body6 (~4.0 MB) + Body33 (~4.2 MB) = ~8.2 MB
+  *(The two largest single bodies; each is near the 10 MB limit solo with slicer overhead)*
+
+- [ ] **Pack 14** `3d-prints/14_core_structure_B/` — Body3 + Body16 + Body25 + Body26 + Body28 + Body38
+  (~1.1 + ~1.2 + ~0.9 + ~0.9 + ~1.1 + ~1.5 MB = ~6.7 MB)
+
+- [ ] **Pack 15** `3d-prints/15_core_structure_C/` — Body1 + Body2 + Body4 + Body5 + Body7 + Body8 + Body9 + Body10 + Body11 + Body12 + Body13 + Body14
+  (~425+118+401+651+320+584+535+231+792+138+559+183 KB = ~4.9 MB)
+
+- [ ] **Pack 16** `3d-prints/16_core_structure_D/` — Body15 + Body17 + Body18 + Body19 + Body20 + Body21 + Body22 + Body23 + Body24 + Body27 + Body29 + Body30
+  (~543+213+526+154+84+154+213+234+84+792+401+538 KB = ~3.9 MB)
+
+- [ ] **Pack 17** `3d-prints/17_core_structure_E/` — Body31 + Body32 + Body34 + Body35 + Body36 + Body37 + Body39 + Body40 + Body41 + Body42 + Body43 + Body44 + Body45 + Body46\* + Body47 + Body48 + Body49 + Body50 + Body51 + Body52 + Body53 + Body54
+  (~5.1 MB total) *\*Body46 = 7.3 KB — flag for CAD review before printing*
+
+---
+
+### Step 3 — Post-sort validation
+
+- [ ] Confirm `3d-prints/` root is empty after all files are moved — no orphans left behind
+- [ ] Verify total file count across all print packs matches count of printable originals
+- [ ] Spot-check 3–4 files per pack by opening in slicer to confirm geometry is valid and
+  not inside-out / zero-volume
+- [ ] Add a `3d-prints/README.md` listing pack descriptions, recommended materials, and
+  quantities per part
+
+---
+
 ## Parking Lot / Future
 
 - [ ] Camera feed (CSI or USB cam) streamed to GCS or web UI
