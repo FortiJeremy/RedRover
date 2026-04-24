@@ -5,6 +5,7 @@ desktop.ini
 
 # Editor
 .vscode/
+*.code-workspace
 *.swp
 *.swo
 
@@ -17,3 +18,21 @@ desktop.ini
 # Local notes / scratch
 scratch/
 notes-local.md
+
+# AI / Copilot custom instructions (local only, not shared)
+.github/copilot-instructions/
+.instructions/
+*.instructions.md
+*.prompt.md
+
+# Secrets and credentials
+.env
+.env.*
+secrets/
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+config.local.*
