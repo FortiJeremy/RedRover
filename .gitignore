@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Build outputs (from Mars-Rover submodule — covered by its own .gitignore)
+*.pio/
+*.elf
+*.bin
+*.hex
+
+# Local notes / scratch
+scratch/
+notes-local.md

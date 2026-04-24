@@ -1,0 +1,3 @@
+[submodule "Mars-Rover"]
+	path = Mars-Rover
+	url = git@github.com:FortiJeremy/Mars-Rover.git
